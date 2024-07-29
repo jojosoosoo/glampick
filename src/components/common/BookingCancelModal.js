@@ -5,6 +5,8 @@ import { colorSystem } from "../../styles/color";
 import { ActionButton, DeleteButton } from "./Button";
 import { getCookie } from "../../utils/cookie";
 import { ModalLine } from "../../styles/modalstyle";
+import { useRecoilState } from "recoil";
+import { accessTokenState } from "../../atoms/loginState";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -78,7 +80,8 @@ const BookingCancelModal = ({
   comment,
   onBookingCancelled, // 예약 취소 시 호출될 콜백 함수
 }) => {
-  const [accessToken, setAccessToken] = useState("");
+  // const [accessToken, setAccessToken] = useState("");
+  const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
   // 예약 취소 성공 여부 상태 추가
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -100,9 +103,9 @@ const BookingCancelModal = ({
   useEffect(() => {
     const fetchAccessToken = async () => {
       try {
-        const accessTokenFromCookie = getCookie("access-Token");
-        if (accessTokenFromCookie) {
-          setAccessToken(accessTokenFromCookie);
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+          setAccessToken(token);
         } else {
           // console.log("쿠키에 access-Token 없음");
         }

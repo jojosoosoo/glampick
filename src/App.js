@@ -1,10 +1,10 @@
+import { useEffect, useState } from "react";
 import {
-  BrowserRouter,
   Route,
   Routes,
   useLocation,
   useNavigate,
-  useParams,
+  useParams
 } from "react-router-dom";
 import "../src/styles/color";
 import "../src/styles/common.css";
@@ -12,26 +12,38 @@ import "../src/styles/reset.css";
 import "./App.css";
 import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
+import CeoBooking from "./pages/ceo/CeoBooking";
+import CeoGlamping from "./pages/ceo/CeoGlamping";
+import CeoInfo from "./pages/ceo/CeoInfo";
+import CeoReview from "./pages/ceo/CeoReview";
+import CeoRoom from "./pages/ceo/CeoRoom";
+import CeoSignup from "./pages/ceo/CeoSignup";
+import Chart from "./pages/ceo/Chart";
+import GlampingDetail from "./pages/GlampingDetail";
+import GlampingKing from "./pages/GlampingKing";
 import MainPage from "./pages/MainPage";
+import BookingDetail from "./pages/mypage/BookingDetail";
+import Favorite from "./pages/mypage/Favorite";
+import MyReview from "./pages/mypage/MyReview";
+import UserInfo from "./pages/mypage/UserInfo";
+import NotfoundPage from "./pages/NotfoundPage";
+import PaymentDone from "./pages/PaymentDone";
+import PaymentPage from "./pages/PaymentPage";
+import Review from "./pages/Review";
+import RoomDetail from "./pages/RoomDetail";
+import SearchPage from "./pages/SearchPage";
 import LoginPage from "./pages/user/LoginPage";
 import SignupPage from "./pages/user/SignupPage";
 import SnsSignupPage from "./pages/user/SnsSignUpPage";
-import SearchPage from "./pages/SearchPage";
-import GlampingDetail from "./pages/GlampingDetail";
-import RoomDetail from "./pages/RoomDetail";
-import Review from "./pages/Review";
-import PaymentPage from "./pages/PaymentPage";
-import PaymentDone from "./pages/PaymentDone";
-import BookingDetail from "./pages/mypage/BookingDetail";
-import MyReview from "./pages/mypage/MyReview";
-import Favorite from "./pages/mypage/Favorite";
-import UserInfo from "./pages/mypage/UserInfo";
-import NotfoundPage from "./pages/NotfoundPage";
-import { useEffect, useState } from "react";
 import { getCookie, removeCookie } from "./utils/cookie";
+import { useRecoilState } from "recoil";
+import { accessTokenState, isLoginState } from "./atoms/loginState";
 
 function App() {
-  const [isLogin, setIsLogin] = useState(false);
+  // 리코일로 로그인 상태 관리 변경
+  const [isLogin, setIsLogin] = useRecoilState(isLoginState);
+  const [accessToken, setAccessToken] = useRecoilState(accessTokenState);
+
   const locationNow = useLocation();
   const navigate = useNavigate();
 
@@ -44,9 +56,10 @@ function App() {
     return <GlampingDetail isLogin={isLogin} />;
   };
 
-  // 페이지 이동할 때마다 로그인 화긴
+  // 페이지 이동할 때마다 로그인 확인
   useEffect(() => {
-    const accessToken = getCookie("access-Token");
+    // (변경) 로컬스토리에 토큰 저장
+    const accessToken = localStorage.getItem("accessToken")
     if (accessToken) {
       setIsLogin(true);
     } else {
@@ -56,9 +69,11 @@ function App() {
 
   // 로그아웃
   const handleLogout = () => {
-    removeCookie("access-Token", { path: "/" });
+    // 로컬스토리지에서 토큰 삭제
+    localStorage.removeItem("accessToken", { path: "/" });
     setIsLogin(false);
     navigate("/login");
+    setAccessToken("");
   };
 
   return (
@@ -92,6 +107,18 @@ function App() {
         <Route path="/myreview" element={<MyReview />} />
         <Route path="/favorite" element={<Favorite />} />
         <Route path="/userinfo" element={<UserInfo />} />
+
+        {/* 사장님 페이지 */}
+        <Route path="/ceobooking" element={<CeoBooking />} />
+        <Route path="/ceoglamping" element={<CeoGlamping />} />
+        <Route path="/ceoinfo" element={<CeoInfo />} />
+        <Route path="/ceoreview" element={<CeoReview />} />
+        <Route path="/ceoroom" element={<CeoRoom />} />
+        <Route path="/ceosignup" element={<CeoSignup />} />
+        <Route path="/chart" element={<Chart />} />
+
+        {/* 관리자 페이지 */}
+        <Route path="/glampingking" element={<GlampingKing/>} />
 
         {/* 잘못된 경로 */}
         <Route path="/*" element={<NotfoundPage />} />

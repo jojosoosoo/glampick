@@ -5,6 +5,7 @@ import { useRecoilState } from "recoil";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import CeoBookingDetailModal from "./CeoBookingDetailModal";
 
 const CeoBookingDetailStyle = styled.div`
   width: 100%;
@@ -17,6 +18,7 @@ const CeoBookingDetailStyle = styled.div`
   border: 1px solid ${colorSystem.g300};
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
   margin-bottom: 10px;
+  cursor: pointer;
 
   .booking-info {
     width: 60%;
@@ -41,6 +43,11 @@ const CeoBookingDetailStyle = styled.div`
       display: flex;
       gap: 5px;
       color: ${colorSystem.g700};
+
+      .room-name {
+        color: ${colorSystem.p800};
+        font-weight: 500;
+      }
     }
 
     .stay-night {
@@ -61,6 +68,15 @@ const CeoBookingDetailStyle = styled.div`
   }
 `;
 
+// 예약 내역이 없을 시
+const NoBookingMessage = styled.div`
+  display: flex;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: ${colorSystem.g800};
+  margin: 10px 0px;
+`;
+
 interface BookingDetail {
   inputName: string;
   personnel: number;
@@ -73,63 +89,72 @@ interface BookingDetail {
 interface CeoBookingDetailProps {
   bookingDetails: BookingDetail[];
 }
-const CeoBookingDetail: React.FC = () => {
-  const [ceoAccessToken] = useRecoilState(ceoAccessTokenState);
-  const [bookingDetails, setBookingDetails] = useState<BookingDetail[]>([]);
-  const [page, setPage] = useState(1);
+const CeoBookingDetail: React.FC<CeoBookingDetailProps> = ({
+  bookingDetails,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    // 예약 상세 내역 불러오기
-    const getOwnerBook = async (date: Date) => {
-      if (!ceoAccessToken) return;
+  // 예약 상세 내역 불러오기
+  // useEffect(() => {
+  //   const getOwnerBook = async (date: Date) => {
+  //     if (!ceoAccessToken) return;
 
-      const formattedDate = moment(date).format("YYYY-MM-DD");
+  //     const formattedDate = moment(date).format("YYYY-MM-DD");
 
-      try {
-        const response = await axios.get(
-          `/api/owner/book?date=${formattedDate}&page=${page}`,
-          {
-            headers: {
-              Authorization: `Bearer ${ceoAccessToken}`,
-            },
-          },
-        );
-        if (response.data.code === "SU") {
-          setBookingDetails(response.data.complete || []);
-          console.log(response);
-          return response.data;
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    const today = new Date();
-    getOwnerBook(today);
-  }, [ceoAccessToken]);
+  //     try {
+  //       const response = await axios.get(
+  //         `/api/owner/book?date=${formattedDate}&page=${page}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${ceoAccessToken}`,
+  //           },
+  //         },
+  //       );
+  //       if (response.data.code === "SU") {
+  //         setBookingDetails(response.data.complete || []);
+  //         console.log(response);
+  //         return response.data;
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   const today = new Date();
+  //   getOwnerBook(today);
+  // }, [ceoAccessToken]);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
   return (
-    <>
-      {bookingDetails.map((detail, index) => (
-        <CeoBookingDetailStyle key={index}>
-          <div className="booking-info">
-            <div className="guest-info">
-              <div className="guest-name">{detail.inputName}님 |</div>
-              <div className="guest-number">{detail.personnel}인</div>
-            </div>
-            <div className="stay-info">
-              <div>
-                {moment(detail.checkInDate).format("MM.DD")} -{" "}
-                {moment(detail.checkOutDate).format("MM.DD")} |
+    <div>
+      {bookingDetails.length === 0 ? (
+        <NoBookingMessage>예약 내역이 없습니다.</NoBookingMessage>
+      ) : (
+        bookingDetails.map((detail, index) => (
+          <CeoBookingDetailStyle key={index} onClick={handleOpenModal}>
+            <div className="booking-info">
+              <div className="guest-info">
+                <div className="guest-name">{detail.inputName}님 |</div>
+                <div className="guest-number">{detail.personnel}인</div>
               </div>
-              <div>{detail.roomName}</div>
+              <div className="stay-info">
+                <div>
+                  {moment(detail.checkInDate).format("MM.DD")} -{" "}
+                  {moment(detail.checkOutDate).format("MM.DD")} |
+                </div>
+                <div className="room-name">{detail.roomName}</div>
+              </div>
             </div>
-          </div>
-          <div className="total-amount">
-            <div>{detail.payAmount.toLocaleString()}원</div>
-          </div>
-        </CeoBookingDetailStyle>
-      ))}
-    </>
+            <div className="total-amount">
+              <div>{detail.payAmount.toLocaleString()}원</div>
+            </div>
+          </CeoBookingDetailStyle>
+        ))
+      )}
+
+      <CeoBookingDetailModal isOpen={isModalOpen} onClose={handleCloseModal} />
+    </div>
   );
 };
 

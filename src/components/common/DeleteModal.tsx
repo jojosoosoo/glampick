@@ -88,6 +88,7 @@ interface DeleteModalProps {
   onClose: () => void;
   onConfirm: () => void;
   accessToken: string;
+  apiEndpoint: string;
 }
 
 const DeleteModal: React.FC<DeleteModalProps> = ({
@@ -95,13 +96,15 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
   onClose,
   onConfirm,
   accessToken,
+  apiEndpoint,
 }) => {
   const navigate = useNavigate();
   if (!isOpen) return null;
 
+  // 회원탈퇴 함수
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`/api/user`, {
+      const response = await axios.delete(apiEndpoint, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

@@ -461,6 +461,8 @@ const CeoInfo = () => {
         onClose={() => {
           handleCloseDeleteModal();
         }}
+        accessToken={ceoAccessToken}
+        apiEndpoint="/api/owner/withdraw"
       />
     </WrapStyle>
   );
